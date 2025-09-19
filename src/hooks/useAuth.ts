@@ -52,16 +52,12 @@ export function useAuth() {
     }
   };
 
-  const signUp = async (email: string, password: string, metadata?: { firstName: string; lastName: string; contact: string; gender: string }) => {
+  const signUp = async (email: string, password: string) => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: metadata
-        }
       });
 
       if (error) throw error;

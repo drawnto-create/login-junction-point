@@ -1,23 +1,18 @@
 import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Eye, EyeOff, Lock, Mail, User, Phone } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 
 const signUpSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
-  contact: z.string().min(10, 'Contact number must be at least 10 digits'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
-  gender: z.string().min(1, 'Please select a gender'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -37,7 +32,6 @@ export function SignUpForm({ onToggleMode }: SignUpFormProps) {
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
   } = useForm<SignUpForm>({
     resolver: zodResolver(signUpSchema),
@@ -45,12 +39,7 @@ export function SignUpForm({ onToggleMode }: SignUpFormProps) {
 
   const onSubmit = async (data: SignUpForm) => {
     try {
-      await signUp(data.email, data.password, {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        contact: data.contact,
-        gender: data.gender,
-      });
+      await signUp(data.email, data.password);
       onToggleMode(); // Switch to login form after successful signup
     } catch (error) {
       // Error handling is done in the useAuth hook
@@ -75,46 +64,6 @@ export function SignUpForm({ onToggleMode }: SignUpFormProps) {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-sm font-medium">
-                First Name
-              </Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="firstName"
-                  type="text"
-                  placeholder="First name"
-                  className="pl-10 h-12 border-border bg-background/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200"
-                  {...register('firstName')}
-                />
-              </div>
-              {errors.firstName && (
-                <p className="text-xs text-destructive mt-1">{errors.firstName.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="lastName" className="text-sm font-medium">
-                Last Name
-              </Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="lastName"
-                  type="text"
-                  placeholder="Last name"
-                  className="pl-10 h-12 border-border bg-background/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200"
-                  {...register('lastName')}
-                />
-              </div>
-              {errors.lastName && (
-                <p className="text-xs text-destructive mt-1">{errors.lastName.message}</p>
-              )}
-            </div>
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
               Email Address
@@ -131,25 +80,6 @@ export function SignUpForm({ onToggleMode }: SignUpFormProps) {
             </div>
             {errors.email && (
               <p className="text-xs text-destructive mt-1">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="contact" className="text-sm font-medium">
-              Contact
-            </Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="contact"
-                type="tel"
-                placeholder="Contact number"
-                className="pl-10 h-12 border-border bg-background/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200"
-                {...register('contact')}
-              />
-            </div>
-            {errors.contact && (
-              <p className="text-xs text-destructive mt-1">{errors.contact.message}</p>
             )}
           </div>
 
@@ -202,31 +132,6 @@ export function SignUpForm({ onToggleMode }: SignUpFormProps) {
             </div>
             {errors.confirmPassword && (
               <p className="text-xs text-destructive mt-1">{errors.confirmPassword.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="gender" className="text-sm font-medium">
-              Gender
-            </Label>
-            <Controller
-              name="gender"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="h-12 border-border bg-background/50 focus:ring-2 focus:ring-primary/20 transition-all duration-200">
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover/95 backdrop-blur-sm border-border">
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.gender && (
-              <p className="text-xs text-destructive mt-1">{errors.gender.message}</p>
             )}
           </div>
         </CardContent>
